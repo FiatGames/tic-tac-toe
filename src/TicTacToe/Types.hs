@@ -8,6 +8,7 @@ import Data.Bool
 import Data.Maybe
 import Control.Monad
 import Data.Sequence (Seq, (|>))
+import Control.Applicative
 
 data Player = X | O
   deriving (Eq,Show)
@@ -52,10 +53,9 @@ winningLines = upDown ++ transpose upDown ++ diag
       ]
 
 winner :: GameState -> Maybe GameOver
-winner (GameState b t _) = if won
-                           then Just $ Win otherT
-                           else bool Nothing (Just Draw) tie
+winner (GameState b t _) = boolToMaybe (Win otherT) won <|> boolToMaybe Draw tie
   where
+    boolToMaybe f = bool Nothing (Just f)
     tie = all isJust b
     won = any (all (\s -> b ! s == Just otherT)) winningLines
     otherT = case t of 
