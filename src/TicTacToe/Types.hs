@@ -1,3 +1,5 @@
+{-# LANGUAGE DeriveGeneric              #-}
+
 module TicTacToe.Types where
 
 import Data.HashMap.Strict (HashMap, (!))
@@ -9,27 +11,50 @@ import Data.Maybe
 import Control.Monad
 import Data.Sequence (Seq, (|>))
 import Control.Applicative
+import GHC.Generics
+import           Data.Aeson.Types      (FromJSON, ToJSON (..), defaultOptions, genericToEncoding)
+import GHC.Exts (toList)
 
 data Player = X | O
-  deriving (Eq,Show)
-
+  deriving (Eq,Show, Generic)
+instance FromJSON Player
+instance ToJSON Player where
+  toEncoding = genericToEncoding defaultOptions
+  
 data GameState = GameState 
   { gameStateBoard :: !Board
   , gameStateTurn :: !Player
   , gameStateMoves :: !(Seq Move)
-  } deriving (Eq,Show)
+  } deriving (Eq,Show, Generic)
+
+data GameStateDTO =  GameStateDTO
+  { gameStateDTOBoard :: ![(Spot, Maybe Player)]
+  , gameStateDTOTurn :: !Player
+  , gameStateDTOMoves :: ![Move]
+  } deriving (Eq,Show, Generic)
+instance FromJSON GameStateDTO
+instance ToJSON GameStateDTO where
+  toEncoding = genericToEncoding defaultOptions
 
 data Spot = UL | UM | UR | ML | MM | MR | DL | DM | DR
-  deriving (Eq,Show,Enum)
+  deriving (Eq,Show,Enum, Generic)
 instance Hashable Spot
   where hashWithSalt i s = i + fromEnum s
+instance FromJSON Spot
+instance ToJSON Spot where
+  toEncoding = genericToEncoding defaultOptions
 
 data GameOver = Win Player | Draw
-  deriving (Eq,Show)
+  deriving (Eq,Show, Generic)
+instance FromJSON GameOver
+instance ToJSON GameOver where
+  toEncoding = genericToEncoding defaultOptions
 
 type Move = Spot
 type Board = HashMap Spot (Maybe Player)
 
+toGameStateDTO :: GameState -> GameStateDTO
+toGameStateDTO (GameState b t mvs) = GameStateDTO (toList b) t (toList mvs)
 emptyBoard :: Board
 emptyBoard = HM.fromList (map (flip (,) Nothing) $ enumFrom UL)
 
@@ -40,13 +65,14 @@ possibleMoves :: GameState -> [Move]
 possibleMoves (GameState b _ _) = HM.foldlWithKey' (\l s mp -> maybe (s:l) (const l) mp) [] b
 
 winningLines :: [[Spot]]
-winningLines = upDown ++ transpose upDown ++ diag
+winningLines = upDown ++ leftRight ++ diag
   where 
     upDown =
       [ [UL, UM, UR]
       , [ML, MM, MR]
       , [DL, DM, DR]
       ]
+    leftRight = transpose upDown
     diag = 
       [ [UL, MM, DR]
       , [UR, MM, DL]

@@ -21,6 +21,10 @@ library
                      , unordered-containers
                      , hashable
                      , containers
+                     , purescript-bridge
+                     , lens
+                     , mtl
+                     , aeson
   default-language:    Haskell2010
 
 executable tic-tac-toe-exe
@@ -29,6 +33,7 @@ executable tic-tac-toe-exe
   ghc-options:         -Wall -threaded -rtsopts -with-rtsopts=-N
   build-depends:       base
                      , tic-tac-toe
+                     , purescript-bridge
   default-language:    Haskell2010
 
 test-suite tic-tac-toe-test
