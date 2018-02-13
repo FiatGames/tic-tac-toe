@@ -1,6 +1,6 @@
 module Main where
 
-import Lib
+import TicTacToe.Types
 
 main :: IO ()
-main = someFunc
+main = print $ playGame game1
