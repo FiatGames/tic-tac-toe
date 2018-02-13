@@ -13,9 +13,9 @@ data Player = X | O
   deriving (Eq,Show)
 
 data GameState = GameState 
-  { gameStateBoard :: Board
-  , gameStateTurn :: Player
-  , gameStateMoves :: Seq Move
+  { gameStateBoard :: !Board
+  , gameStateTurn :: !Player
+  , gameStateMoves :: !(Seq Move)
   } deriving (Eq,Show)
 
 data Spot = UL | UM | UR | ML | MM | MR | DL | DM | DR
