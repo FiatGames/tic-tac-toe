@@ -3,11 +3,11 @@ module TicTacToe.Types where
 import Data.HashMap.Strict (HashMap, (!))
 import qualified Data.HashMap.Strict as HM
 import Data.Hashable (hashWithSalt,Hashable)
-import Data.DList (DList, snoc)
 import Data.List (transpose)
 import Data.Bool
 import Data.Maybe
 import Control.Monad
+import Data.Sequence (Seq, (|>))
 
 data Player = X | O
   deriving (Eq,Show)
@@ -15,7 +15,7 @@ data Player = X | O
 data GameState = GameState 
   { gameStateBoard :: Board
   , gameStateTurn :: Player
-  , gameStateMoves :: DList Move
+  , gameStateMoves :: Seq Move
   } deriving (Eq,Show)
 
 data Spot = UL | UM | UR | ML | MM | MR | DL | DM | DR
@@ -66,7 +66,7 @@ makeMove :: GameState -> Move -> Either (GameState, GameOver) GameState
 makeMove (GameState b t ms) m = maybe (Right gs) (Left . (,) gs) (winner gs)
   where
     gs = GameState b' t' ms'
-    ms' = snoc ms m
+    ms' = ms |> m
     b' = HM.update (const $ Just $ Just t) m b
     t' = case t of 
       X -> O
