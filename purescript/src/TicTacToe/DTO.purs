@@ -16,11 +16,11 @@ import Data.Generic (class Generic)
 
 newtype GameState =
     GameState {
-      gameStateBoard :: Array (Tuple Spot (Maybe Player))
-    , gameStateTurn :: Player
-    , gameStateMoves :: Array Spot
-    , gameStateGameOver :: Maybe GameOver
-    , gameStateValidMoves :: Array Spot
+      board :: Array (Tuple Spot (Maybe Player))
+    , turn :: Player
+    , moves :: Array Spot
+    , gameOver :: Maybe GameOver
+    , validMoves :: Array Spot
     }
 
 derive instance genericGameState :: Generic GameState
@@ -29,7 +29,7 @@ derive instance newtypeGameState :: Newtype GameState _
 
 
 --------------------------------------------------------------------------------
-_GameState :: Iso' GameState { gameStateBoard :: Array (Tuple Spot (Maybe Player)), gameStateTurn :: Player, gameStateMoves :: Array Spot, gameStateGameOver :: Maybe GameOver, gameStateValidMoves :: Array Spot}
+_GameState :: Iso' GameState { board :: Array (Tuple Spot (Maybe Player)), turn :: Player, moves :: Array Spot, gameOver :: Maybe GameOver, validMoves :: Array Spot}
 _GameState = _Newtype
 
 --------------------------------------------------------------------------------

@@ -12,15 +12,15 @@ import           Data.Sequence       (Seq, (|>))
 import           GHC.Generics
 
 data Player = X | O
-  deriving (Eq,Show, Generic)
+  deriving (Eq,Show,Generic)
 
 data Spot = UL | UM | UR | ML | MM | MR | DL | DM | DR
-  deriving (Eq,Show,Enum, Generic)
+  deriving (Eq,Show,Enum,Generic)
 instance Hashable Spot
   where hashWithSalt i s = i + fromEnum s
 
 data GameOver = Win Player | Draw
-  deriving (Eq,Show, Generic)
+  deriving (Eq,Show,Generic)
 
 type Move = Spot
 type Board = HashMap Spot (Maybe Player)
@@ -30,7 +30,7 @@ data GameState = GameState
   , gameStateTurn     :: !Player
   , gameStateMoves    :: !(Seq Move)
   , gameStateGameOver :: !(Maybe GameOver)
-  } deriving (Eq,Show, Generic)
+  } deriving (Eq,Show,Generic)
 
 emptyBoard :: Board
 emptyBoard = HM.fromList (map (flip (,) Nothing) $ enumFrom UL)
@@ -39,7 +39,7 @@ initialState :: GameState
 initialState = GameState emptyBoard X mempty Nothing
 
 validMoves :: GameState -> [Move]
-validMoves (GameState b _ _ Nothing) = HM.foldlWithKey' (\l s mp -> maybe (s:l) (const l) mp) [] b
+validMoves (GameState b _ _ Nothing) = HM.foldlWithKey' (\l s -> maybe (s:l) (const l)) [] b
 validMoves (GameState _ _ _ (Just _)) = []
 
 winningLines :: [[Spot]]

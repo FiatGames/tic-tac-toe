@@ -16,7 +16,7 @@ data Player =
   | O
 
 derive instance genericPlayer :: Generic Player
-
+derive instance eqPlayer :: Eq Player
 
 --------------------------------------------------------------------------------
 _X :: Prism' Player Unit
@@ -44,7 +44,7 @@ data Spot =
   | DR
 
 derive instance genericSpot :: Generic Spot
-
+derive instance eqSpot :: Eq Spot
 
 --------------------------------------------------------------------------------
 _UL :: Prism' Spot Unit
@@ -107,7 +107,7 @@ data GameOver =
   | Draw
 
 derive instance genericGameOver :: Generic GameOver
-
+derive instance eqGameOver :: Eq GameOver
 
 --------------------------------------------------------------------------------
 _Win :: Prism' GameOver Player

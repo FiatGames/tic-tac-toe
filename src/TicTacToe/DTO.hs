@@ -17,16 +17,16 @@ $(deriveJSON defaultOptions ''T.Player)
 $(deriveJSON defaultOptions ''T.GameOver)
 
 data GameState =  GameState
-  { gameStateBoard      :: ![(T.Spot, Maybe T.Player)]
-  , gameStateTurn       :: !T.Player
-  , gameStateMoves      :: ![T.Move]
-  , gameStateGameOver   :: !(Maybe T.GameOver)
-  , gameStateValidMoves :: ![T.Move]
-  } deriving (Eq,Show, Generic)
+  { board      :: ![(T.Spot, Maybe T.Player)]
+  , turn       :: !T.Player
+  , moves      :: ![T.Move]
+  , gameOver   :: !(Maybe T.GameOver)
+  , validMoves :: ![T.Move]
+  } deriving (Eq,Show,Generic)
 $(deriveJSON defaultOptions ''GameState)
 
 toGameStateDTO :: T.GameState -> GameState
-toGameStateDTO gs@(T.GameState b t mvs go) = GameState (toList b) t (toList mvs) go (T.validMoves gs)
+toGameStateDTO gs@(T.GameState b t mvs o) = GameState (toList b) t (toList mvs) o (T.validMoves gs)
 
 game1 :: GameState
 game1 = toGameStateDTO $ T.playGame T.game1
