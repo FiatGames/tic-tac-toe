@@ -1,2 +1,4 @@
+import qualified TicTacToe.CodeGen as C
+
 main :: IO ()
-main = putStrLn "Test suite not yet implemented"
+main = C.main

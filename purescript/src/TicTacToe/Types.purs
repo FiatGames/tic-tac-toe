@@ -4,11 +4,9 @@ module TicTacToe.Types where
 import Data.Lens (Iso', Lens', Prism', lens, prism')
 import Data.Lens.Iso.Newtype (_Newtype)
 import Data.Lens.Record (prop)
-import Data.Maybe (Maybe, Maybe(..))
+import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype)
 import Data.Symbol (SProxy(SProxy))
-import Data.Tuple (Tuple)
-import Prim (Array)
 
 import Prelude
 import Data.Generic (class Generic)
@@ -123,22 +121,5 @@ _Draw = prism' (\_ -> Draw) f
   where
     f Draw = Just unit
     f _ = Nothing
-
---------------------------------------------------------------------------------
-newtype GameStateDTO =
-    GameStateDTO {
-      gameStateDTOBoard :: Array (Tuple Spot (Maybe Player))
-    , gameStateDTOTurn :: Player
-    , gameStateDTOMoves :: Array Spot
-    }
-
-derive instance genericGameStateDTO :: Generic GameStateDTO
-
-derive instance newtypeGameStateDTO :: Newtype GameStateDTO _
-
-
---------------------------------------------------------------------------------
-_GameStateDTO :: Iso' GameStateDTO { gameStateDTOBoard :: Array (Tuple Spot (Maybe Player)), gameStateDTOTurn :: Player, gameStateDTOMoves :: Array Spot}
-_GameStateDTO = _Newtype
 
 --------------------------------------------------------------------------------

@@ -1,22 +1,23 @@
-{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DataKinds         #-}
+{-# LANGUAGE FlexibleContexts  #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE FlexibleContexts #-}
 
 module TicTacToe.CodeGen where
 
-import Language.PureScript.Bridge
-import TicTacToe.Types
-import Data.Proxy
-  
+import           Data.Proxy
+import           Language.PureScript.Bridge
+import qualified TicTacToe.DTO              as DTO
+import qualified TicTacToe.Types            as T
+
 bridge :: BridgePart
 bridge = defaultBridge
 
 myTypes :: [SumType 'Haskell]
 myTypes =
-  [ mkSumType (Proxy :: Proxy Player)
-  , mkSumType (Proxy :: Proxy Spot)
-  , mkSumType (Proxy :: Proxy GameOver)
-  , mkSumType (Proxy :: Proxy GameStateDTO)
+  [ mkSumType (Proxy :: Proxy T.Player)
+  , mkSumType (Proxy :: Proxy T.Spot)
+  , mkSumType (Proxy :: Proxy T.GameOver)
+  , mkSumType (Proxy :: Proxy DTO.GameState)
   ]
 
 main :: IO ()
