@@ -2,11 +2,12 @@
 module TicTacToe.Types where
 
 import           Control.Applicative
+import           Control.Monad
 import           Data.Bool
 import           Data.Hashable       (Hashable, hashWithSalt)
 import           Data.HashMap.Strict (HashMap, (!))
 import qualified Data.HashMap.Strict as HM
-import           Data.List           (foldl', transpose)
+import           Data.List           (transpose)
 import           Data.Maybe
 import           Data.Sequence       (Seq, (|>))
 import           GHC.Generics
@@ -22,7 +23,7 @@ instance Hashable Spot
 data GameOver = Win Player | Draw
   deriving (Eq,Show,Generic)
 
-type Move = Spot
+type Move = (Player,Spot)
 type Board = HashMap Spot (Maybe Player)
 
 data GameState = GameState
@@ -39,7 +40,7 @@ initialState :: GameState
 initialState = GameState emptyBoard X mempty Nothing
 
 validMoves :: GameState -> [Move]
-validMoves (GameState b _ _ Nothing) = HM.foldlWithKey' (\l s -> maybe (s:l) (const l)) [] b
+validMoves (GameState b p _ Nothing) = HM.foldlWithKey' (\l s -> maybe ((p,s):l) (const l)) [] b
 validMoves (GameState _ _ _ (Just _)) = []
 
 winningLines :: [[Spot]]
@@ -63,21 +64,23 @@ winner b t = boolToMaybe (Win t) won <|> boolToMaybe Draw tie
     tie = all isJust b
     won = any (all (\s -> b ! s == Just t)) winningLines
 
-makeMove :: GameState -> Move -> GameState
-makeMove gs@(GameState _ _ _ (Just _)) _ = gs
-makeMove (GameState b t ms Nothing) m = gs'
+makeMove :: GameState -> Move -> Either String GameState
+makeMove (GameState _ _ _ (Just _)) _ = Left "Game is over"
+makeMove (GameState b t ms Nothing) (p,m)
+  | p == t = Right gs'
+  | otherwise = Left "Game is over"
   where
     gs' = GameState b' t' ms' (winner b' t)
-    ms' = ms |> m
+    ms' = ms |> (p,m)
     b' = HM.update (const $ Just $ Just t) m b
     t' = case t of
       X -> O
       O -> X
 
-playGame :: [Move] -> GameState
-playGame = foldl' makeMove initialState
+playGame :: [Move] -> Either String GameState
+playGame = foldM makeMove initialState
 
 game1 :: [Move]
-game1 = [UL,MM,UM,DM,UR]
+game1 = [(X,UL),(O,MM),(X,UM),(O,DM),(X,UR)]
 game2 :: [Move]
-game2 = [UL,MM,UM,DM,MR]
+game2 = [(X,UL),(O,MM),(X,UM),(O,DM),(X,MR)]
