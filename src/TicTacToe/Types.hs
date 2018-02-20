@@ -68,7 +68,7 @@ makeMove :: GameState -> Move -> Either String GameState
 makeMove (GameState _ _ _ (Just _)) _ = Left "Game is over"
 makeMove (GameState b t ms Nothing) (p,m)
   | p == t = Right gs'
-  | otherwise = Left "Game is over"
+  | otherwise = Left "Incorrect Move"
   where
     gs' = GameState b' t' ms' (winner b' t)
     ms' = ms |> (p,m)
