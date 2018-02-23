@@ -17,7 +17,7 @@ import           Data.List           (transpose)
 import           Data.Maybe
 import           Data.Sequence       (Seq, (|>))
 import           Data.Text           (Text)
-import           FiatGame            (FiatMove (..), FiatPlayer)
+import           FiatGame            (FiatMove (..), FiatPlayer (..))
 import           GHC.Generics
 
 data Player = X | O
@@ -84,18 +84,18 @@ winner b t = boolToMaybe (Win t) won <|> boolToMaybe Draw tie
     won = any (all (\s -> b ! s == Just t)) winningLines
 
 makeMove :: GameState -> FiatMove Move -> Either Text GameState
-makeMove gs (FiatMove p (SetPlayer X)) = Right $ gs & gameStateXPlayer .~ Just p
-makeMove gs (FiatMove p (SetPlayer O)) = Right $ gs & gameStateOPlayer .~ Just p
+makeMove gs (FiatMove (FiatPlayer p) (SetPlayer X)) = Right $ gs & gameStateXPlayer .~ Just (FiatPlayer p)
+makeMove gs (FiatMove (FiatPlayer p) (SetPlayer O)) = Right $ gs & gameStateOPlayer .~ Just (FiatPlayer p)
 makeMove (GameState _ _ _ _ Nothing _) (FiatMove _ (Place _)) = Left "Players not set up"
 makeMove (GameState _ _ _ _ _ Nothing) (FiatMove _ (Place _)) = Left "Players not set up"
 makeMove (GameState _ _ _ (Just _) _ _) _ = Left "Game is over"
-makeMove (GameState b t ms Nothing (Just x) (Just y)) mv@(FiatMove p (Place m))
+makeMove (GameState b t ms Nothing (Just (FiatPlayer x)) (Just (FiatPlayer y))) mv@(FiatMove (FiatPlayer p) (Place m))
   | p /= x && p /= y = Left "Player not in game"
   | p == x && t /= X = Left "It is not the players turn"
   | p == y && t /= O = Left "It is not the players turn"
   | otherwise = Right gs'
   where
-    gs' = GameState b' t' ms' (winner b' t) (Just x) (Just y)
+    gs' = GameState b' t' ms' (winner b' t) (Just (FiatPlayer x)) (Just (FiatPlayer y))
     ms' = ms |> mv
     b' = HM.update (const $ Just $ Just t) m b
     t' = case t of
@@ -106,6 +106,6 @@ playGame :: [FiatMove Move] -> Either Text GameState
 playGame = foldM makeMove initialState
 
 game1 :: [FiatMove Move]
-game1 = [FiatMove 0 (SetPlayer X), FiatMove 1 (SetPlayer O), FiatMove 0 (Place UL),FiatMove 1 (Place MM),FiatMove 0 (Place UM),FiatMove 1 (Place DM),FiatMove 0 (Place UR)]
+game1 = [FiatMove (FiatPlayer 0) (SetPlayer X), FiatMove (FiatPlayer 1) (SetPlayer O), FiatMove (FiatPlayer 0) (Place UL),FiatMove (FiatPlayer 1) (Place MM),FiatMove (FiatPlayer 0) (Place UM),FiatMove (FiatPlayer 1) (Place DM),FiatMove (FiatPlayer 0) (Place UR)]
 game2 :: [FiatMove Move]
-game2 = [FiatMove 0 (SetPlayer X), FiatMove 1 (SetPlayer O), FiatMove 0 (Place UL),FiatMove 1 (Place MM),FiatMove 0 (Place UM),FiatMove 1 (Place DM),FiatMove 0 (Place MR)]
+game2 = [FiatMove (FiatPlayer 0) (SetPlayer X), FiatMove (FiatPlayer 1) (SetPlayer O), FiatMove (FiatPlayer 0) (Place UL),FiatMove (FiatPlayer 1) (Place MM),FiatMove (FiatPlayer 0) (Place UM),FiatMove (FiatPlayer 1) (Place DM),FiatMove (FiatPlayer 0) (Place MR)]
