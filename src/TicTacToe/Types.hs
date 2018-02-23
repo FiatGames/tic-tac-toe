@@ -84,8 +84,8 @@ winner b t = boolToMaybe (Win t) won <|> boolToMaybe Draw tie
     won = any (all (\s -> b ! s == Just t)) winningLines
 
 makeMove :: GameState -> FiatMove Move -> Either Text GameState
-makeMove gs (FiatMove (FiatPlayer p) (SetPlayer X)) = Right $ gs & gameStateXPlayer .~ Just (FiatPlayer p)
-makeMove gs (FiatMove (FiatPlayer p) (SetPlayer O)) = Right $ gs & gameStateOPlayer .~ Just (FiatPlayer p)
+makeMove gs mv@(FiatMove (FiatPlayer p) (SetPlayer X)) = Right $ gs & gameStateXPlayer .~ Just (FiatPlayer p) & gameStateMoves %~ (|> mv)
+makeMove gs mv@(FiatMove (FiatPlayer p) (SetPlayer O)) = Right $ gs & gameStateOPlayer .~ Just (FiatPlayer p) & gameStateMoves %~ (|> mv)
 makeMove (GameState _ _ _ _ Nothing _) (FiatMove _ (Place _)) = Left "Players not set up"
 makeMove (GameState _ _ _ _ _ Nothing) (FiatMove _ (Place _)) = Left "Players not set up"
 makeMove (GameState _ _ _ (Just _) _ _) _ = Left "Game is over"
