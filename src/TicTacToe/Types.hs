@@ -8,16 +8,13 @@ module TicTacToe.Types where
 
 import           Control.Applicative
 import           Control.Lens        hiding ((|>))
-import           Control.Monad
 import           Data.Bool
 import           Data.Hashable       (Hashable, hashWithSalt)
 import           Data.HashMap.Strict (HashMap, (!))
 import qualified Data.HashMap.Strict as HM
-import           Data.List           (transpose)
+import           Data.List           (foldl', transpose)
 import           Data.Maybe
 import           Data.Sequence       (Seq, (|>))
-import           Data.Text           (Text)
-import           FiatGame            (FiatMove (..), FiatPlayer (..))
 import           GHC.Generics
 
 data Player = X | O
@@ -32,8 +29,7 @@ data GameOver = Win Player | Draw
   deriving (Eq,Show,Generic)
 
 data Move
-  = SetPlayer Player
-  | Place Spot
+  = Place Spot
   deriving (Eq,Show,Generic)
 
 type Board = HashMap Spot (Maybe Player)
@@ -41,10 +37,8 @@ type Board = HashMap Spot (Maybe Player)
 data GameState = GameState
   { _gameStateBoard    :: !Board
   , _gameStateTurn     :: !Player
-  , _gameStateMoves    :: !(Seq (FiatMove Move))
+  , _gameStateMoves    :: !(Seq Move)
   , _gameStateGameOver :: !(Maybe GameOver)
-  , _gameStateXPlayer  :: Maybe FiatPlayer
-  , _gameStateOPlayer  :: Maybe FiatPlayer
   } deriving (Eq,Show,Generic)
 makeLenses ''GameState
 
@@ -52,15 +46,11 @@ emptyBoard :: Board
 emptyBoard = HM.fromList (map (flip (,) Nothing) $ enumFrom UL)
 
 initialState :: GameState
-initialState = GameState emptyBoard X mempty Nothing Nothing Nothing
+initialState = GameState emptyBoard X mempty Nothing
 
-validMoves :: GameState -> [FiatMove Move]
-validMoves (GameState b p _ Nothing (Just x) (Just o)) = HM.foldlWithKey' (\l s -> maybe (FiatMove pl (Place s):l) (const l)) [] b
-  where pl = case p of
-              X -> x
-              O -> o
-validMoves (GameState _ _ _ Nothing _ _) = []
-validMoves (GameState _ _ _ (Just _) _ _) = []
+validMoves :: GameState -> [Move]
+validMoves (GameState _ _ _ (Just _)) = []
+validMoves (GameState b _ _ Nothing) = HM.foldlWithKey' (\l s -> maybe (Place s:l) (const l)) [] b
 
 winningLines :: [[Spot]]
 winningLines = upDown ++ leftRight ++ diag
@@ -83,29 +73,22 @@ winner b t = boolToMaybe (Win t) won <|> boolToMaybe Draw tie
     tie = all isJust b
     won = any (all (\s -> b ! s == Just t)) winningLines
 
-makeMove :: GameState -> FiatMove Move -> Either Text GameState
-makeMove gs mv@(FiatMove (FiatPlayer p) (SetPlayer X)) = Right $ gs & gameStateXPlayer .~ Just (FiatPlayer p) & gameStateMoves %~ (|> mv)
-makeMove gs mv@(FiatMove (FiatPlayer p) (SetPlayer O)) = Right $ gs & gameStateOPlayer .~ Just (FiatPlayer p) & gameStateMoves %~ (|> mv)
-makeMove (GameState _ _ _ _ Nothing _) (FiatMove _ (Place _)) = Left "Players not set up"
-makeMove (GameState _ _ _ _ _ Nothing) (FiatMove _ (Place _)) = Left "Players not set up"
-makeMove (GameState _ _ _ (Just _) _ _) _ = Left "Game is over"
-makeMove (GameState b t ms Nothing (Just (FiatPlayer x)) (Just (FiatPlayer y))) mv@(FiatMove (FiatPlayer p) (Place m))
-  | p /= x && p /= y = Left "Player not in game"
-  | p == x && t /= X = Left "It is not the players turn"
-  | p == y && t /= O = Left "It is not the players turn"
-  | otherwise = Right gs'
+makeMove :: GameState -> Move -> GameState
+makeMove gs@(GameState _ _ _ (Just _)) _ = gs
+makeMove (GameState b t ms Nothing) mv@(Place m)
+  = gs'
   where
-    gs' = GameState b' t' ms' (winner b' t) (Just (FiatPlayer x)) (Just (FiatPlayer y))
+    gs' = GameState b' t' ms' (winner b' t)
     ms' = ms |> mv
     b' = HM.update (const $ Just $ Just t) m b
     t' = case t of
       X -> O
       O -> X
 
-playGame :: [FiatMove Move] -> Either Text GameState
-playGame = foldM makeMove initialState
+playGame :: [Move] -> GameState
+playGame = foldl' makeMove initialState
 
-game1 :: [FiatMove Move]
-game1 = [FiatMove (FiatPlayer 0) (SetPlayer X), FiatMove (FiatPlayer 1) (SetPlayer O), FiatMove (FiatPlayer 0) (Place UL),FiatMove (FiatPlayer 1) (Place MM),FiatMove (FiatPlayer 0) (Place UM),FiatMove (FiatPlayer 1) (Place DM),FiatMove (FiatPlayer 0) (Place UR)]
-game2 :: [FiatMove Move]
-game2 = [FiatMove (FiatPlayer 0) (SetPlayer X), FiatMove (FiatPlayer 1) (SetPlayer O), FiatMove (FiatPlayer 0) (Place UL),FiatMove (FiatPlayer 1) (Place MM),FiatMove (FiatPlayer 0) (Place UM),FiatMove (FiatPlayer 1) (Place DM),FiatMove (FiatPlayer 0) (Place MR)]
+game1 :: [Move]
+game1 = [Place UL,Place MM,Place UM, Place DM,Place UR]
+game2 :: [Move]
+game2 = [Place UL,Place MM,Place UM,Place DM,Place MR]

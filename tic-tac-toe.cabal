@@ -26,7 +26,6 @@ library
                      , text
                      , bytestring
                      , aeson
-                     , fiat-game
   default-language:    Haskell2010
 
 executable tic-tac-toe-exe

@@ -40,9 +40,7 @@ packages:
 
 # Dependency packages to be pulled from upstream that are not in the resolver
 # (e.g., acme-missiles-0.3)
-extra-deps:
-- git: https://github.com/FiatGames/fiat-game
-  commit: 60d5466190f3834a96e1d42691827fb964cf1296
+# extra-deps:
 
 # Override default flag values for local packages and extra-deps
 # flags: {}
